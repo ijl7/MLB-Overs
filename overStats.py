@@ -49,9 +49,9 @@ def getScoreDiffMidInning(inning):
             game = 0
             for row in csvFile:
                 game += 1
-                (homeScore, awayScore) = getScore(row, awayMax = min(inning,len(row['awayinnings'])-1), homeMax = min(inning-1, len(row['homeinnings'])-2))
+                (homeScore, awayScore) = getScore(row, awayMax = inning-1, homeMax = inning-2)
                 if homeScore != None:
-                    gameDiff.__setitem__(game,(homeScore+awayScore,homeScore-awayScore))
+                    gameDiff.__setitem__((i, game),(homeScore+awayScore,homeScore-awayScore))
                 awayScore = 0
                 homeScore = 0
 
@@ -67,9 +67,9 @@ def getScoreDiffTopInning(inning):
             game = 0
             for row in csvFile:
                 game += 1
-                (homeScore, awayScore) = getScore(row, awayMax = min(inning-1,len(row['awayinnings'])-1), homeMax = min(inning-1, len(row['homeinnings'])-2))
+                (homeScore, awayScore) = getScore(row, awayMax = inning-1, homeMax = inning-1)
                 if homeScore != None:
-                    gameDiff.__setitem__(game,(homeScore+awayScore,homeScore-awayScore))
+                    gameDiff.__setitem__((i, game),(homeScore+awayScore,homeScore-awayScore))
                 awayScore = 0
                 homeScore = 0
 
@@ -88,9 +88,9 @@ def getRunsAfterTie():
                 game += 1
                 (homeScore, awayScore) = getScore(row, awayMax = len(row['awayinnings']), homeMax = len(row['homeinnings']))
                 totalRuns = homeScore + awayScore
-                if gameDiff.get(game) != None:
-                    if gameDiff.get(game)[1] == 0:
-                        runsAfterTie.append(totalRuns - gameDiff.get(game)[0])
+                if gameDiff.get((i, game)) != None:
+                    if gameDiff.get((i, game))[1] == 0:
+                        runsAfterTie.append(totalRuns - gameDiff.get((i, game))[0])
                 
                     
         i += 1
