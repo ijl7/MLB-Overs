@@ -5,7 +5,7 @@ gameDiff = {}
 runsAfterTie = []
 
 #going to be used to clean up the code, unused right now
-def getAnyScore(row, awayMax, homeMax):
+def getScore(row, awayMax, homeMax):
     homeScore = 0
     awayScore = 0
 
@@ -39,7 +39,7 @@ def getAnyScore(row, awayMax, homeMax):
 
     return (homeScore, awayScore)
 
-def getScoreDiffMid8th():
+def getScoreDiffMidInning(inning):
     homeScore = 0
     awayScore = 0
     i = 2020
@@ -49,7 +49,25 @@ def getScoreDiffMid8th():
             game = 0
             for row in csvFile:
                 game += 1
-                (homeScore, awayScore) = getAnyScore(row, awayMax = min(8,len(row['awayinnings'])-1), homeMax = min(7, len(row['homeinnings'])-2))
+                (homeScore, awayScore) = getScore(row, awayMax = min(inning,len(row['awayinnings'])-1), homeMax = min(inning-1, len(row['homeinnings'])-2))
+                if homeScore != None:
+                    gameDiff.__setitem__(game,(homeScore+awayScore,homeScore-awayScore))
+                awayScore = 0
+                homeScore = 0
+
+        i += 1
+
+def getScoreDiffTopInning(inning):
+    homeScore = 0
+    awayScore = 0
+    i = 2020
+    while i < 2024:
+        with open('gl' + str(i) + '.csv', mode='r') as file:
+            csvFile = csv.DictReader(file)
+            game = 0
+            for row in csvFile:
+                game += 1
+                (homeScore, awayScore) = getScore(row, awayMax = min(inning-1,len(row['awayinnings'])-1), homeMax = min(inning-1, len(row['homeinnings'])-2))
                 if homeScore != None:
                     gameDiff.__setitem__(game,(homeScore+awayScore,homeScore-awayScore))
                 awayScore = 0
@@ -68,7 +86,7 @@ def getRunsAfterTie():
                 awayScore = 0
                 homeScore = 0
                 game += 1
-                (homeScore, awayScore) = getAnyScore(row, awayMax = len(row['awayinnings']), homeMax = len(row['homeinnings']))
+                (homeScore, awayScore) = getScore(row, awayMax = len(row['awayinnings']), homeMax = len(row['homeinnings']))
                 totalRuns = homeScore + awayScore
                 if gameDiff.get(game) != None:
                     if gameDiff.get(game)[1] == 0:
@@ -77,14 +95,22 @@ def getRunsAfterTie():
                     
         i += 1
 
-getScoreDiffMid8th()
+inning = input('When would you like to get the score from?\n')
+timeOfGame = ''
+if float(inning) % 1 == 0:
+    getScoreDiffTopInning(int(inning))
+    timeOfGame = ' top ' + str(inning) + 'th'
+else:
+    getScoreDiffMidInning(int(float(inning)-.5))
+    timeOfGame = ' mid ' + str(int(float(inning)-.5)) + 'th'
 getRunsAfterTie()
 over = 0
 under = 0
+runsAdded = input('How many more runs are you wondering about?\n')
 for runs in runsAfterTie:
-    if runs > 1:
+    if runs > int(runsAdded) - 1:
         over += 1
     else:
         under += 1
-print('\nIn the past 4 seasons there was an average of ' + str(round(sum(runsAfterTie)/len(runsAfterTie), 3)) + ' runs scored in games not tied in the mid 8th.\n')
-print(str(over) + ' of ' + str(len(runsAfterTie)) + ' games went over, or ' + str(round((over/len(runsAfterTie))*100, 3)) + '%.')
+print('\nIn the past 4 seasons there was an average of ' + str(round(sum(runsAfterTie)/len(runsAfterTie), 3)) + ' runs scored in games tied in the' + timeOfGame + '.\n')
+print(str(over) + ' of ' + str(len(runsAfterTie)) + ' games went over ' + runsAdded + ' runs, or ' + str(round((over/len(runsAfterTie))*100, 3)) + '%.')
