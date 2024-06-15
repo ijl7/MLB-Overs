@@ -49,7 +49,7 @@ def getScoreDiffMidInning(inning):
             game = 0
             for row in csvFile:
                 game += 1
-                (homeScore, awayScore) = getScore(row, awayMax = inning-1, homeMax = inning-2)
+                (homeScore, awayScore) = getScore(row, awayMax = inning, homeMax = inning-1)
                 if homeScore != None:
                     gameDiff.__setitem__((i, game),(homeScore+awayScore,homeScore-awayScore))
                 awayScore = 0
@@ -75,7 +75,7 @@ def getScoreDiffTopInning(inning):
 
         i += 1
         
-def getRunsAfterTie():
+def getRunsAfterTie(wentToExtras):
     i = 2020
     while i < 2024:
         with open('gl' + str(i) + '.csv', mode='r') as file:
@@ -91,9 +91,12 @@ def getRunsAfterTie():
                 if gameDiff.get((i, game)) != None:
                     if gameDiff.get((i, game))[1] == 0:
                         runsAfterTie.append(totalRuns - gameDiff.get((i, game))[0])
+                        if len(row['homeinnings']) > 9 and len(row['awayinnings']) > 9:
+                            wentToExtras += 1
                 
                     
         i += 1
+    return wentToExtras
 
 inning = input('When would you like to get the score from?\n')
 timeOfGame = ''
@@ -103,7 +106,7 @@ if float(inning) % 1 == 0:
 else:
     getScoreDiffMidInning(int(float(inning)-.5))
     timeOfGame = ' mid ' + str(int(float(inning)-.5)) + 'th'
-getRunsAfterTie()
+wentToExtras = getRunsAfterTie(0)
 over = 0
 under = 0
 runsAdded = input('How many more runs are you wondering about?\n')
@@ -114,3 +117,4 @@ for runs in runsAfterTie:
         under += 1
 print('\nIn the past 4 seasons there was an average of ' + str(round(sum(runsAfterTie)/len(runsAfterTie), 3)) + ' runs scored in games tied in the' + timeOfGame + '.\n')
 print(str(over) + ' of ' + str(len(runsAfterTie)) + ' games went over ' + runsAdded + ' runs, or ' + str(round((over/len(runsAfterTie))*100, 3)) + '%.')
+print(str(wentToExtras) + ' of the ' + str(len(runsAfterTie)) + ' games went to extra innings.')
